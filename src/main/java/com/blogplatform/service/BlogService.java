@@ -42,7 +42,7 @@ public class BlogService {
 
     public PostDetailResponse getBySlug(String slug) {
         BlogPost post = postRepo.findBySlugAndIsPublishedTrue(slug)
-            .orElseThrow(() -> new NoSuchElementException("Post not found: " + slug));
+                .orElseThrow(() -> new NoSuchElementException("Post not found: " + slug));
         return toDetail(post);
     }
 
@@ -50,33 +50,37 @@ public class BlogService {
 
     @Transactional
     public PostDetailResponse createPost(CreatePostRequest req) {
+        req.setAuthorId(UUID.fromString("4cf643e7-5f73-4c29-97e8-41aa711b458f"));
+
         Author author = authorRepo.findById(req.getAuthorId())
-            .orElseThrow(() -> new NoSuchElementException("Author not found"));
+                .orElseThrow(() -> new NoSuchElementException("Author not found")); // Change this later to include
+                                                                                    // different author. For now its
+                                                                                    // always faiz
 
         if (postRepo.existsBySlug(req.getSlug())) {
             throw new IllegalArgumentException("Slug already exists: " + req.getSlug());
         }
 
         BlogPost post = BlogPost.builder()
-            .title(req.getTitle())
-            .slug(req.getSlug())
-            .author(author)
-            .date(LocalDate.now())
-            .readingTime(req.getReadingTime() != null ? req.getReadingTime() : "1 min read")
-            .thumbnail(req.getThumbnail())
-            .description(req.getDescription())
-            .likes(0)
-            .isPublished(true)
-            .hashtags(new HashSet<>())
-            .sections(new ArrayList<>())
-            .comments(new ArrayList<>())
-            .build();
+                .title(req.getTitle())
+                .slug(req.getSlug())
+                .author(author)
+                .date(LocalDate.now())
+                .readingTime(req.getReadingTime() != null ? req.getReadingTime() : "1 min read")
+                .thumbnail(req.getThumbnail())
+                .description(req.getDescription())
+                .likes(0)
+                .isPublished(true)
+                .hashtags(new HashSet<>())
+                .sections(new ArrayList<>())
+                .comments(new ArrayList<>())
+                .build();
 
         // Hashtags
         if (req.getHashtags() != null) {
             for (String tagName : req.getHashtags()) {
                 Hashtag ht = hashtagRepo.findByName(tagName)
-                    .orElseGet(() -> hashtagRepo.save(Hashtag.builder().name(tagName).build()));
+                        .orElseGet(() -> hashtagRepo.save(Hashtag.builder().name(tagName).build()));
                 post.getHashtags().add(ht);
             }
         }
@@ -86,11 +90,11 @@ public class BlogService {
             for (int i = 0; i < req.getSections().size(); i++) {
                 CreatePostRequest.SectionInput si = req.getSections().get(i);
                 BlogSection section = BlogSection.builder()
-                    .post(post)
-                    .sortOrder(i)
-                    .type(BlogSection.SectionType.valueOf(si.getType()))
-                    .content(si.getContent())
-                    .build();
+                        .post(post)
+                        .sortOrder(i)
+                        .type(BlogSection.SectionType.valueOf(si.getType()))
+                        .content(si.getContent())
+                        .build();
                 post.getSections().add(section);
             }
         }
@@ -104,20 +108,25 @@ public class BlogService {
     @Transactional
     public PostDetailResponse updatePost(UUID id, UpdatePostRequest req) {
         BlogPost post = postRepo.findById(id)
-            .orElseThrow(() -> new NoSuchElementException("Post not found"));
+                .orElseThrow(() -> new NoSuchElementException("Post not found"));
 
-        if (req.getTitle() != null) post.setTitle(req.getTitle());
-        if (req.getDescription() != null) post.setDescription(req.getDescription());
-        if (req.getThumbnail() != null) post.setThumbnail(req.getThumbnail());
-        if (req.getReadingTime() != null) post.setReadingTime(req.getReadingTime());
-        if (req.getIsPublished() != null) post.setIsPublished(req.getIsPublished());
+        if (req.getTitle() != null)
+            post.setTitle(req.getTitle());
+        if (req.getDescription() != null)
+            post.setDescription(req.getDescription());
+        if (req.getThumbnail() != null)
+            post.setThumbnail(req.getThumbnail());
+        if (req.getReadingTime() != null)
+            post.setReadingTime(req.getReadingTime());
+        if (req.getIsPublished() != null)
+            post.setIsPublished(req.getIsPublished());
 
         // Replace hashtags
         if (req.getHashtags() != null) {
             post.getHashtags().clear();
             for (String tagName : req.getHashtags()) {
                 Hashtag ht = hashtagRepo.findByName(tagName)
-                    .orElseGet(() -> hashtagRepo.save(Hashtag.builder().name(tagName).build()));
+                        .orElseGet(() -> hashtagRepo.save(Hashtag.builder().name(tagName).build()));
                 post.getHashtags().add(ht);
             }
         }
@@ -128,11 +137,11 @@ public class BlogService {
             for (int i = 0; i < req.getSections().size(); i++) {
                 CreatePostRequest.SectionInput si = req.getSections().get(i);
                 BlogSection section = BlogSection.builder()
-                    .post(post)
-                    .sortOrder(i)
-                    .type(BlogSection.SectionType.valueOf(si.getType()))
-                    .content(si.getContent())
-                    .build();
+                        .post(post)
+                        .sortOrder(i)
+                        .type(BlogSection.SectionType.valueOf(si.getType()))
+                        .content(si.getContent())
+                        .build();
                 post.getSections().add(section);
             }
         }
@@ -161,15 +170,15 @@ public class BlogService {
     @Transactional
     public PostDetailResponse.CommentResponse addComment(UUID postId, CreateCommentRequest req) {
         BlogPost post = postRepo.findById(postId)
-            .orElseThrow(() -> new NoSuchElementException("Post not found"));
+                .orElseThrow(() -> new NoSuchElementException("Post not found"));
 
         BlogComment comment = BlogComment.builder()
-            .post(post)
-            .username(req.getUsername())
-            .avatar(req.getAvatar())
-            .text(req.getText())
-            .likes(0)
-            .build();
+                .post(post)
+                .username(req.getUsername())
+                .avatar(req.getAvatar())
+                .text(req.getText())
+                .likes(0)
+                .build();
 
         comment = commentRepo.save(comment);
         return toCommentResponse(comment);
@@ -190,64 +199,62 @@ public class BlogService {
 
     public List<String> getAllTags() {
         return hashtagRepo.findAll().stream()
-            .map(Hashtag::getName)
-            .sorted()
-            .collect(Collectors.toList());
+                .map(Hashtag::getName)
+                .sorted()
+                .collect(Collectors.toList());
     }
 
     // ─── Mappers ─────────────────────────────────────────────
 
     private PostSummaryResponse toSummary(BlogPost p) {
         return PostSummaryResponse.builder()
-            .id(p.getId())
-            .title(p.getTitle())
-            .slug(p.getSlug())
-            .authorName(p.getAuthor().getName())
-            .authorAvatar(p.getAuthor().getAvatar())
-            .date(p.getDate())
-            .readingTime(p.getReadingTime())
-            .thumbnail(p.getThumbnail())
-            .description(p.getDescription())
-            .likes(p.getLikes())
-            .commentsCount(commentRepo.countByPostId(p.getId()))
-            .hashtags(p.getHashtags().stream().map(Hashtag::getName).sorted().toList())
-            .build();
+                .id(p.getId())
+                .title(p.getTitle())
+                .slug(p.getSlug())
+                .authorName(p.getAuthor().getName())
+                .authorAvatar(p.getAuthor().getAvatar())
+                .date(p.getDate())
+                .readingTime(p.getReadingTime())
+                .thumbnail(p.getThumbnail())
+                .description(p.getDescription())
+                .likes(p.getLikes())
+                .commentsCount(commentRepo.countByPostId(p.getId()))
+                .hashtags(p.getHashtags().stream().map(Hashtag::getName).sorted().toList())
+                .build();
     }
 
     private PostDetailResponse toDetail(BlogPost p) {
         return PostDetailResponse.builder()
-            .id(p.getId())
-            .title(p.getTitle())
-            .slug(p.getSlug())
-            .authorName(p.getAuthor().getName())
-            .authorAvatar(p.getAuthor().getAvatar())
-            .date(p.getDate())
-            .readingTime(p.getReadingTime())
-            .thumbnail(p.getThumbnail())
-            .description(p.getDescription())
-            .likes(p.getLikes())
-            .commentsCount(commentRepo.countByPostId(p.getId()))
-            .hashtags(p.getHashtags().stream().map(Hashtag::getName).sorted().toList())
-            .sections(p.getSections().stream().map(s ->
-                PostDetailResponse.SectionResponse.builder()
-                    .id(s.getId())
-                    .sortOrder(s.getSortOrder())
-                    .type(s.getType().name())
-                    .content(s.getContent())
-                    .build()
-            ).toList())
-            .comments(p.getComments().stream().map(this::toCommentResponse).toList())
-            .build();
+                .id(p.getId())
+                .title(p.getTitle())
+                .slug(p.getSlug())
+                .authorName(p.getAuthor().getName())
+                .authorAvatar(p.getAuthor().getAvatar())
+                .date(p.getDate())
+                .readingTime(p.getReadingTime())
+                .thumbnail(p.getThumbnail())
+                .description(p.getDescription())
+                .likes(p.getLikes())
+                .commentsCount(commentRepo.countByPostId(p.getId()))
+                .hashtags(p.getHashtags().stream().map(Hashtag::getName).sorted().toList())
+                .sections(p.getSections().stream().map(s -> PostDetailResponse.SectionResponse.builder()
+                        .id(s.getId())
+                        .sortOrder(s.getSortOrder())
+                        .type(s.getType().name())
+                        .content(s.getContent())
+                        .build()).toList())
+                .comments(p.getComments().stream().map(this::toCommentResponse).toList())
+                .build();
     }
 
     private PostDetailResponse.CommentResponse toCommentResponse(BlogComment c) {
         return PostDetailResponse.CommentResponse.builder()
-            .id(c.getId())
-            .username(c.getUsername())
-            .avatar(c.getAvatar())
-            .text(c.getText())
-            .likes(c.getLikes())
-            .createdAt(c.getCreatedAt() != null ? c.getCreatedAt().toString() : null)
-            .build();
+                .id(c.getId())
+                .username(c.getUsername())
+                .avatar(c.getAvatar())
+                .text(c.getText())
+                .likes(c.getLikes())
+                .createdAt(c.getCreatedAt() != null ? c.getCreatedAt().toString() : null)
+                .build();
     }
 }

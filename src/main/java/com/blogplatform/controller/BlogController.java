@@ -1,6 +1,9 @@
 package com.blogplatform.controller;
 
 import com.blogplatform.dto.*;
+import com.blogplatform.model.Author;
+import com.blogplatform.repository.AuthorRepository;
+import com.blogplatform.service.AuthorService;
 import com.blogplatform.service.BlogService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,10 +18,11 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class BlogController {
 
     private final BlogService blogService;
+    private final AuthorService authorService;
+
 
     // ─── Posts ────────────────────────────────────────────────
 
@@ -30,6 +34,11 @@ public class BlogController {
         @RequestParam(required = false) String search
     ) {
         return blogService.listPosts(page, size, tag, search);
+    }
+
+    @GetMapping("/authors")
+    public ResponseEntity<List<Author>> listAuthors() {
+        return ResponseEntity.ok(authorService.getAllAuthors());
     }
 
     @GetMapping("/posts/{slug}")
