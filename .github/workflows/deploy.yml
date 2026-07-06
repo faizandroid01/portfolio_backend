@@ -28,15 +28,12 @@ jobs:
           EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_USER: ${{ secrets.EC2_USER }}
         run: |
-          printf '%s\n' "$SSH_KEY" > /tmp/deploy_key.pem
+          echo "$SSH_KEY" | base64 -d > /tmp/deploy_key.pem
           chmod 600 /tmp/deploy_key.pem
-          echo "--- Key fingerprint in Actions ---"
           ssh-keygen -l -f /tmp/deploy_key.pem
-          echo "--- Trying SSH ---"
           ssh -i /tmp/deploy_key.pem \
               -o StrictHostKeyChecking=no \
               -o ConnectTimeout=30 \
-              -v \
               $EC2_USER@$EC2_HOST \
-              "echo connected"
+              "/opt/blog-api/deploy.sh"
           rm -f /tmp/deploy_key.pem
